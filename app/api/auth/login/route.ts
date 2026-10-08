@@ -20,7 +20,7 @@ export function GET(request: NextRequest) {
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 600,
+    maxAge: 3600, // GitHub 승인 화면에 오래 머물러도 state가 만료되지 않도록 1시간
   });
   return res;
 }
