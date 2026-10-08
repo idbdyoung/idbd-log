@@ -2,11 +2,13 @@ import { notFound } from "next/navigation";
 import { requireSession } from "@/lib/auth";
 import { getPost, isValidSlug } from "@/lib/admin-posts";
 import { PostEditor } from "@/components/admin/PostEditor";
+import { decodeParam } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeParam(rawSlug);
   if (!isValidSlug(slug)) notFound();
   const session = await requireSession();
   const post = await getPost(session.token, slug);

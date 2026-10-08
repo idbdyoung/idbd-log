@@ -2,13 +2,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import { requireSession } from "@/lib/auth";
 import { errorResponse } from "@/lib/api-utils";
 import { getPost, isValidSlug, removePost, savePost, validateInput } from "@/lib/admin-posts";
+import { decodeParam } from "@/lib/utils";
 
 type Ctx = { params: Promise<{ slug: string }> };
 
 export async function GET(_request: NextRequest, { params }: Ctx) {
   try {
     const session = await requireSession();
-    const { slug } = await params;
+    const { slug: rawSlug } = await params;
+    const slug = decodeParam(rawSlug);
     if (!isValidSlug(slug)) return NextResponse.json({ error: "잘못된 슬러그" }, { status: 400 });
     const post = await getPost(session.token, slug);
     if (!post) return NextResponse.json({ error: "글이 없습니다." }, { status: 404 });
@@ -22,7 +24,8 @@ export async function GET(_request: NextRequest, { params }: Ctx) {
 export async function PUT(request: NextRequest, { params }: Ctx) {
   try {
     const session = await requireSession();
-    const { slug } = await params;
+    const { slug: rawSlug } = await params;
+    const slug = decodeParam(rawSlug);
     if (!isValidSlug(slug)) return NextResponse.json({ error: "잘못된 슬러그" }, { status: 400 });
 
     const input = validateInput(await request.json());
@@ -50,7 +53,8 @@ export async function PUT(request: NextRequest, { params }: Ctx) {
 export async function DELETE(_request: NextRequest, { params }: Ctx) {
   try {
     const session = await requireSession();
-    const { slug } = await params;
+    const { slug: rawSlug } = await params;
+    const slug = decodeParam(rawSlug);
     if (!isValidSlug(slug)) return NextResponse.json({ error: "잘못된 슬러그" }, { status: 400 });
     const existing = await getPost(session.token, slug);
     if (!existing) return NextResponse.json({ error: "글이 없습니다." }, { status: 404 });

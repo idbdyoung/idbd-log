@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllSlugs, getPostBySlug, getPostsBySeries } from "@/lib/posts";
 import { siteConfig } from "@/lib/config";
-import { formatDate } from "@/lib/utils";
+import { formatDate, decodeParam } from "@/lib/utils";
 import { TagChip } from "@/components/TagChip";
 import { Toc } from "@/components/Toc";
 import { PostBody } from "@/components/PostBody";
@@ -17,8 +17,8 @@ export async function generateMetadata({
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const { slug: rawSlug } = await params;
+  const post = await getPostBySlug(decodeParam(rawSlug));
   if (!post) return {};
 
   return {
@@ -40,8 +40,8 @@ export default async function PostPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const { slug: rawSlug } = await params;
+  const post = await getPostBySlug(decodeParam(rawSlug));
   if (!post) notFound();
 
   const seriesPosts = post.series ? getPostsBySeries(post.series) : [];
