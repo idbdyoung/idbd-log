@@ -1,26 +1,246 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* next-themes의 class 전략(html.dark)에 맞춘 다크 variant */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-brand: #12b886;
+  --color-brand-dark: #0ca678;
+}
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #ffffff;
+  --bg-subtle: #fafafa;
+  --fg: #212529;
+  --fg-muted: #868e96;
+  --border: #e9ecef;
+  --card: #ffffff;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  --bg: #121212;
+  --bg-subtle: #1a1a1a;
+  --fg: #ececec;
+  --fg-muted: #909296;
+  --border: #2a2a2a;
+  --card: #1a1a1a;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- 코드 블록 (rehype-pretty-code / Shiki dual theme) ---------- */
+:root {
+  --shiki-radius: 0.5rem;
+}
+
+[data-rehype-pretty-code-figure] {
+  margin: 1.5rem 0;
+}
+
+figure[data-rehype-pretty-code-figure] pre {
+  overflow-x: auto;
+  border-radius: var(--shiki-radius);
+  border: 1px solid var(--border);
+  background: #fafafa;
+  padding: 1rem 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.dark figure[data-rehype-pretty-code-figure] pre {
+  background: #1b1b1b;
+}
+
+[data-rehype-pretty-code-figure] code {
+  display: grid;
+  font-family: var(--font-mono);
+  counter-reset: line;
+}
+
+[data-rehype-pretty-code-figure] code > [data-line] {
+  padding: 0 1rem;
+  border-left: 2px solid transparent;
+}
+
+code[data-line-numbers] > [data-line]::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  width: 1rem;
+  margin-right: 1.25rem;
+  text-align: right;
+  color: var(--fg-muted);
+}
+
+[data-highlighted-line] {
+  background: rgba(18, 184, 134, 0.08);
+  border-left-color: var(--color-brand) !important;
+}
+
+/* 코드 블록 언어/파일명 라벨 */
+[data-rehype-pretty-code-figure] [data-rehype-pretty-code-title] {
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: var(--shiki-radius) var(--shiki-radius) 0 0;
+  background: var(--bg-subtle);
+  padding: 0.5rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+}
+
+[data-rehype-pretty-code-figure]:has([data-rehype-pretty-code-title]) pre {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Shiki 듀얼 테마: 라이트=기본, 다크=.dark 에서 스위치 */
+[data-rehype-pretty-code-figure] code [data-line],
+[data-rehype-pretty-code-figure] code [data-line] span {
+  color: var(--shiki-light);
+}
+
+.dark [data-rehype-pretty-code-figure] code [data-line],
+.dark [data-rehype-pretty-code-figure] code [data-line] span {
+  color: var(--shiki-dark);
+}
+
+/* 코드 복사 버튼 */
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--bg);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+[data-rehype-pretty-code-figure]:hover .copy-btn {
+  opacity: 1;
+}
+
+.copy-btn:hover {
+  color: var(--fg);
+}
+
+/* 인라인 코드 */
+:not(pre) > code {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 0.3rem;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.875em;
+  font-family: var(--font-mono);
+}
+
+/* ---------- 관리자 편집기 (MDXEditor) ---------- */
+/* MDXEditor 스타일시트가 나중에 로드되므로 선택자 우선순위를 한 단계 높여(html .idbd-editor) 테마 변수를 덮어쓴다.
+   본문 영역은 PostBody와 같은 prose 클래스를 쓴다. */
+html .idbd-editor {
+  --basePageBg: var(--bg);
+  --baseBg: var(--bg-subtle);
+  --baseBgSubtle: var(--bg-subtle);
+  --baseBgHover: var(--border);
+  --baseBgActive: var(--border);
+  --baseLine: var(--border);
+  --baseBorder: var(--border);
+  --baseBorderHover: var(--fg-muted);
+  --baseSolid: var(--fg-muted);
+  --baseSolidHover: var(--fg);
+  --baseText: var(--fg-muted);
+  --baseTextContrast: var(--fg);
+  --accentBg: color-mix(in srgb, var(--color-brand) 12%, transparent);
+  --accentBgSubtle: color-mix(in srgb, var(--color-brand) 8%, transparent);
+  --accentBgHover: color-mix(in srgb, var(--color-brand) 18%, transparent);
+  --accentBgActive: color-mix(in srgb, var(--color-brand) 24%, transparent);
+  --accentBorder: color-mix(in srgb, var(--color-brand) 40%, transparent);
+  --accentBorderHover: var(--color-brand);
+  --accentSolid: var(--color-brand);
+  --accentSolidHover: var(--color-brand-dark);
+  --accentText: var(--color-brand);
+  --accentTextContrast: var(--color-brand-dark);
+  --font-body: var(--font-sans);
+  --font-mono: var(--font-mono);
+  font-family: var(--font-sans);
+  color: var(--fg);
+}
+
+html .idbd-editor [class*="_toolbarRoot_"] {
+  position: sticky;
+  top: 7.6rem;
+  z-index: 20;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--bg-subtle);
+}
+
+html .idbd-editor [class*="_toolbarRoot_"] button,
+html .idbd-editor [class*="_toolbarRoot_"] [role="combobox"] {
+  color: var(--fg);
+}
+
+html .idbd-editor [class*="_toolbarRoot_"] button[data-state="on"],
+html .idbd-editor [class*="_toolbarRoot_"] button:hover {
+  background: var(--border);
+}
+
+html .idbd-editor [class*="_contentEditable_"] {
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  color: var(--fg);
+}
+
+html .idbd-editor [class*="_contentEditable_"]:focus {
+  outline: none;
+}
+
+html .idbd-editor [class*="_placeholder_"] {
+  color: var(--fg-muted);
+  opacity: 0.6;
+  font-size: 1.0625rem;
+}
+
+html .idbd-editor [class*="_codeMirrorWrapper_"] {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--bg-subtle);
+  font-family: var(--font-mono);
+}
+
+html .idbd-editor .cm-editor {
+  background: transparent;
+}
+
+html .idbd-editor .cm-editor .cm-content {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+/* 소스 보기(마크다운 원문) 영역 */
+html .idbd-editor [class*="_diffSourceWrapper_"] .cm-editor,
+html .idbd-editor [class*="_sourceModeWrapper_"] .cm-editor {
+  min-height: 60vh;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
 }
