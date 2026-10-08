@@ -59,6 +59,8 @@ export function PostEditor({ mode, originalSlug, initial }: Props) {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [dirty, setDirty] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
+  // 편집기가 정규화한 마크다운 기준값. 이 값과 다를 때만 "변경됨"으로 본다.
+  const baselineRef = useRef(initial.body);
 
   function update<K extends keyof EditorValues>(key: K, value: EditorValues[K]) {
     setValues((v) => ({ ...v, [key]: value }));
@@ -115,6 +117,7 @@ export function PostEditor({ mode, originalSlug, initial }: Props) {
       setStatus({ kind: "error", message: json.error ?? `저장 실패 (${res.status})` });
       return;
     }
+    baselineRef.current = body;
     setDirty(false);
     setStatus({ kind: "saved", slug: json.slug ?? payload.slug, commitUrl: json.commitUrl ?? "" });
     if (mode === "create" || json.slug !== originalSlug) {
@@ -258,7 +261,8 @@ export function PostEditor({ mode, originalSlug, initial }: Props) {
           placeholder="본문을 여기에 쓰세요. '/'나 마크다운 문법(#, -, ```)을 그대로 쓸 수 있습니다."
           onChange={(md, isInitial) => {
             setValues((v) => ({ ...v, body: md }));
-            if (!isInitial) setDirty(true);
+            if (isInitial) baselineRef.current = md;
+            else if (md !== baselineRef.current) setDirty(true);
           }}
           onError={(e) => setParseError(e.error)}
           suppressHtmlProcessing
